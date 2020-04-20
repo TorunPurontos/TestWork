@@ -1,0 +1,40 @@
+require 'configFiles.gameButtons'
+require 'configFiles.sound'
+require 'configFiles.gameProcess'
+
+function init(self)
+	self.dragging = false
+	createButtons()
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("continue_level") then
+		changeTexture(_, "reload")
+	end
+end
+
+function on_input(self, action_id, action)
+	if action.pressed then
+		chain = {}
+		self.dragging = true
+		checkPosition(action.x, action.y, "last")
+	elseif self.dragging then
+		checkPosition(action.x, action.y, "current")
+		local distanceX =  math.abs(lastX - currentX)
+		local distanceY =  math.abs(lastY - currentY)
+		if (currentX == preLastX) and (currentY == preLastY) and not (distanceX == 0 and distanceY == 0) then
+			checkPosition(action.x, action.y, "freeButton")
+		elseif (distanceX == defaultButtonSize and distanceY == 0) or (distanceX == 0 and distanceY == defaultButtonSize) or (distanceX == 0 and distanceY == 0) and not (distanceX == defaultButtonSize and  distanceY == defaultButtonSize) then
+			checkPosition(action.x, action.y, "selectButton")
+		end	
+	end
+	if action.released then
+		self.dragging = fasle
+		changeTexture("", "reset")
+		checkWord()
+		checkEndLevel()
+	end
+	if action_id == hash("touch")  and action.pressed then
+		useGuiButtons(action.x, action.y)	
+	end
+end
